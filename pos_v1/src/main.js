@@ -106,6 +106,27 @@ function isPromotionItem(barcode){
 }
 
 /**
+*function outputTwoDecimal(num)):强制保留两位小数
+*@param:num 要处理的数据
+*@return:s_num 返回处理后的字符串
+*/
+function outputTwoDecimal(num){
+    var f_num = parseFloat(num);
+
+    f_num = Math.round(f_num*100)/100;
+    var s_num = f_num.toString();
+    var pos_decimal = s_num.indexOf('.');
+    if(pos_decimal<0){
+    	pos_decimal = s_num.length;
+	s_num += '.';
+    }
+    while(s_num.length <= pos_decimal+2){
+    	s_num += '0'
+    }
+    return s_num;
+}
+
+/**
 *function printInventory(inputs):打印账单
 *@param:inputs 输入的购物单
 */
@@ -117,21 +138,21 @@ function printInventory(inputs){
     var printInfo = "***<没钱赚商店>购物清单***\n"
 
     for(var i in detailList ){
-	printInfo += "名称:"+detailList[i].name+",数量:"+detailList[i].num+
-                     detailList[i].unit+",单价:"+detailList[i].price+"(元),小计:"+
-                     detailList[i].price*detailList[i].paidNum+"(元)\n"
+	printInfo += "名称："+detailList[i].name+"，数量："+detailList[i].num+
+                     detailList[i].unit+"，单价："+outputTwoDecimal(detailList[i].price)+"(元)，小计："+
+		     outputTwoDecimal(detailList[i].price*detailList[i].paidNum)+"(元)\n"
 	sumPrice += detailList[i].price*detailList[i].paidNum;
     }
 
     printInfo += "----------------------\n挥泪赠送商品：\n"
     for(var i in detailList ){
 	if(detailList[i].freeNum>0){
-	    printInfo +="名称:"+detailList[i].name+",数量:"+detailList[i].freeNum+detailList[i].unit+"\n"
+	    printInfo +="名称："+detailList[i].name+"，数量："+detailList[i].freeNum+detailList[i].unit+"\n"
 	    savePrice += detailList[i].price*detailList[i].freeNum;
 	}
     }
     printInfo +="----------------------\n"
-    printInfo +="总计:"+sumPrice+"(元)\n"+"节省：" +savePrice+"(元)\n"
+    printInfo +="总计："+outputTwoDecimal(sumPrice)+"(元)\n"+"节省：" +outputTwoDecimal(savePrice)+"(元)\n"
     printInfo +="**********************"
-    console.log(printInfo)
+    console.log(printInfo);
 }
