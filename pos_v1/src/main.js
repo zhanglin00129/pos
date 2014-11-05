@@ -5,32 +5,22 @@
 *@return:realInputs 关联数组，数组下标为物品的barcode，内容为物品数量
 */
 function readInputList(inputs){
-    var realInputs = new Array();
-    var len = inputs.length;
+  //  var realInputs = new Array();
+  var realInputs = {};
+  for(var i = 0;i<inputs.length;++i){
+    var splitResult = splitByDelimiter(inputs[i],'-');
+    var barcode = splitResult[0];
+    var goodsNum = (splitResult[1] ===null)?1:splitResult[1];
 
-    for(var i = 0;i<len;++i){
-	 var barcode = splitByDelimiter(inputs[i],'-')[0];
-  	 var goodsNum = splitByDelimiter(inputs[i],'-')[1];
-	 if(goodsNum == null)
-	     goodsNum = 1;
-	var flag = 0;
-	for(var item in realInputs){
-	 //查找是否已经存过该关键字
-	   if(barcode == item){
-	       realInputs[item]+= goodsNum;
-	       flag = 1;
-	       break;
-           }
-	}
-	//没存过时 
-	 if(flag == 0){
-	    realInputs[barcode]=goodsNum;
-	  }
-    }	
-  
-　　　　return realInputs;
-};
+    if(realInputs.hasOwnProperty(barcode)){
+      realInputs[barcode]+= goodsNum;
+    }else{
+      realInputs[barcode]= goodsNum;
+    }
+  }
+  return realInputs;
 
+}
 /**
 *function splitByDelimiter(input,delimiter)
 *@param:input
@@ -38,13 +28,14 @@ function readInputList(inputs){
 *@return:result,result[0]为分割符前字符,result[1]为分割符后字符,若没有分隔符,则result[1]为null
 */
 function splitByDelimiter(input,delimiter){
-    var result = new Array();
+  //  var result = new Array();
+  var result = {};
     if(input.indexOf(delimiter)>0){
         result[0] = input.split(delimiter)[0];
 	result[1] = (parseInt)(input.split(delimiter)[1]);
     }else{
 	result[0]  = input;
-	result[1] = null;		
+	result[1] = null;
     }
     return result;
 }
@@ -64,28 +55,28 @@ function getFreeNum(num){
 *@return:detailList 详细购物清单
 */
 function getDetailList(realInputs){
-    var sum = 0
+    var sum = 0;
     var detailList = {};
     var allItems = loadAllItems();
-    var j=0;
+    var j = 0;
 
     for(var item in realInputs){
-	var currentInfo = getInfoFromAllItem(item);
-	var tempFreeNum = 0;
-	if(isPromotionItem(item)==1){
-	    tempFreeNum = getFreeNum(realInputs[item]);
-	}
-	var tempPaidNum = realInputs[item]-tempFreeNum
-	detailList[j]={
-	    barcode : currentInfo.barcode,
-	    name : currentInfo.name,
-	    unit : currentInfo.unit,
-	    price : currentInfo.price,
-	    num : realInputs[item],
-	    freeNum : tempFreeNum,
-	    paidNum : tempPaidNum
-	} 
-	++j	
+	     var currentInfo = getInfoFromAllItem(item);
+	     var tempFreeNum = 0;
+	     if(isPromotionItem(item)==1){
+	         tempFreeNum = getFreeNum(realInputs[item]);
+       }
+	     var tempPaidNum = realInputs[item]-tempFreeNum;
+	     detailList[j]={
+	        barcode : currentInfo.barcode,
+	        name : currentInfo.name,
+	        unit : currentInfo.unit,
+	        price : currentInfo.price,
+	        num : realInputs[item],
+	        freeNum : tempFreeNum,
+	        paidNum : tempPaidNum
+	      } ;
+	     j++;
     }
     return detailList;
 }
@@ -99,7 +90,7 @@ function getInfoFromAllItem(barcode){
     var allItems = loadAllItems();
     for(var i=0;i<allItems.length;++i){
 	if(barcode == allItems[i].barcode){
-	    return allItems[i];	
+	    return allItems[i];
 	}
     }
 }
@@ -113,15 +104,15 @@ function getInfoFromAllItem(barcode){
 function isPromotionItem(barcode){
     var flag = 0;
     var promotions = loadPromotions();
-   
+
     for(var i=0;i<promotions.length;++i){
 	if(promotions[i].type=='BUY_TWO_GET_ONE_FREE'){
 	    for(var j = 0;j<promotions[i].barcodes.length;++j){
 	        if(barcode == promotions[i].barcodes[j]){
 		    flag = 1;
-		    break;  		
+		    break;
 		}
-	    }	
+	    }
 	}
     }
     return flag;
@@ -143,7 +134,7 @@ function outputTwoDecimal(num){
 	s_num += '.';
     }
     while(s_num.length <= pos_decimal+2){
-    	s_num += '0'
+    	s_num += '0';
     }
     return s_num;
 }
@@ -157,26 +148,26 @@ function printInventory(inputs){
     var detailList = getDetailList(realInputs);
     var sumPrice = 0;
     var savePrice = 0;
-    var printInfo = "***<没钱赚商店>购物清单***\n"
+    var printInfo = "***<没钱赚商店>购物清单***\n";
 
     for(var i in detailList ){
 	printInfo += "名称："+detailList[i].name+"，数量："+detailList[i].num+
                      detailList[i].unit+"，单价："+outputTwoDecimal(detailList[i].price)+"(元)，小计："+
-		     outputTwoDecimal(detailList[i].price*detailList[i].paidNum)+"(元)\n"
+		     outputTwoDecimal(detailList[i].price*detailList[i].paidNum)+"(元)\n";
 	sumPrice += detailList[i].price*detailList[i].paidNum;
     }
 
-    printInfo += "----------------------\n挥泪赠送商品：\n"
+    printInfo += "----------------------\n挥泪赠送商品：\n";
     for(var i in detailList ){
 	if(detailList[i].freeNum>0){
-	    printInfo +="名称："+detailList[i].name+"，数量："+detailList[i].freeNum+detailList[i].unit+"\n"
+	    printInfo +="名称："+detailList[i].name+"，数量："+detailList[i].freeNum+detailList[i].unit+"\n";
 	    savePrice += detailList[i].price*detailList[i].freeNum;
 	}
     }
-    printInfo +="----------------------\n"
-    printInfo +="总计："+outputTwoDecimal(sumPrice)+"(元)\n"+"节省：" +outputTwoDecimal(savePrice)+"(元)\n"
-    printInfo +="**********************"
+    printInfo +="----------------------\n";
+    printInfo +="总计："+outputTwoDecimal(sumPrice)+"(元)\n"+"节省：" +outputTwoDecimal(savePrice)+"(元)\n";
+    printInfo +="**********************";
     console.log(printInfo);
 
-    
+
 }
