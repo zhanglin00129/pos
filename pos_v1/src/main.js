@@ -9,16 +9,10 @@ function readInputList(inputs){
     var len = inputs.length;
 
     for(var i = 0;i<len;++i){
-	 var barcode;
-  	 var goodsNum;
-        if(inputs[i].indexOf('-')>0){
-            barcode = inputs[i].split('-')[0];
-	    goodsNum = (parseInt)(inputs[i].split('-')[1]);
-        }
-	else{
-	        barcode = inputs[i];
-	        goodsNum = 1;		
-	}
+	 var barcode = splitByDelimiter(inputs[i],'-')[0];
+  	 var goodsNum = splitByDelimiter(inputs[i],'-')[1];
+	 if(goodsNum == null)
+	     goodsNum = 1;
 	var flag = 0;
 	for(var item in realInputs){
 	 //查找是否已经存过该关键字
@@ -36,6 +30,24 @@ function readInputList(inputs){
   
 　　　　return realInputs;
 };
+
+/**
+*function splitByDelimiter(input,delimiter)
+*@param:input
+*@param:delimiter
+*@return:result,result[0]为分割符前字符,result[1]为分割符后字符,若没有分隔符,则result[1]为null
+*/
+function splitByDelimiter(input,delimiter){
+    var result = new Array();
+    if(input.indexOf(delimiter)>0){
+        result[0] = input.split(delimiter)[0];
+	result[1] = (parseInt)(input.split(delimiter)[1]);
+    }else{
+	result[0]  = input;
+	result[1] = null;		
+    }
+    return result;
+}
 
 /**
 *getFreeNum(num):计算免费产品的件数
@@ -58,30 +70,40 @@ function getDetailList(realInputs){
     var j=0;
 
     for(var item in realInputs){
-
-	for(var i=0;i<allItems.length;++i){
-
-	    if(item == allItems[i].barcode){
-		var tempFreeNum = 0;
-		if(isPromotionItem(item)==1){
-		    tempFreeNum = getFreeNum(realInputs[item])
-		}
-		var tempPaidNum = realInputs[item]-tempFreeNum
-		detailList[j]={
-		    barcode : allItems[i].barcode,
-		    name : allItems[i].name,
-		    unit : allItems[i].unit,
-	   	    price : allItems[i].price,
-		    num : realInputs[item],
-		    freeNum : tempFreeNum,
-		    paidNum : tempPaidNum
-		} 
-		++j	
-	    }   	
+	var currentInfo = getInfoFromAllItem(item);
+	var tempFreeNum = 0;
+	if(isPromotionItem(item)==1){
+	    tempFreeNum = getFreeNum(realInputs[item]);
 	}
+	var tempPaidNum = realInputs[item]-tempFreeNum
+	detailList[j]={
+	    barcode : currentInfo.barcode,
+	    name : currentInfo.name,
+	    unit : currentInfo.unit,
+	    price : currentInfo.price,
+	    num : realInputs[item],
+	    freeNum : tempFreeNum,
+	    paidNum : tempPaidNum
+	} 
+	++j	
     }
     return detailList;
 }
+
+/**
+*function getInfoFromAllItem(barcode)
+*@param:barcode
+*@return:
+*/
+function getInfoFromAllItem(barcode){
+    var allItems = loadAllItems();
+    for(var i=0;i<allItems.length;++i){
+	if(barcode == allItems[i].barcode){
+	    return allItems[i];	
+	}
+    }
+}
+
 
 /**
 *function isPromotionItem(barcode):根据条形码判断产品是否优惠产品
@@ -155,4 +177,6 @@ function printInventory(inputs){
     printInfo +="总计："+outputTwoDecimal(sumPrice)+"(元)\n"+"节省：" +outputTwoDecimal(savePrice)+"(元)\n"
     printInfo +="**********************"
     console.log(printInfo);
+
+    
 }
