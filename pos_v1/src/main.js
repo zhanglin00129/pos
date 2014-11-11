@@ -52,7 +52,7 @@ function getDetailList(realInputs){
 
     for(var item in realInputs){
 	     var currentInfo = getInfoFromAllItem(item);
-	     var tempFreeNum = (isPromotionItem(item)==1) ? realInputs[item]:0;
+	     var tempFreeNum = (isPromotionItem(item)==1) ? getFreeNum(realInputs[item]):0;
 
        detailList[j] = new DetailListItem(currentInfo.barcode,currentInfo.name,currentInfo.unit,
                                           currentInfo.price,realInputs[item],tempFreeNum);
@@ -73,7 +73,7 @@ function DetailListItem(barcode,name,unit,price,num,freeNum){
   this.price = price;
   this.num = num;
   this.freeNum = freeNum;
-  this.paidNum = num - freenum;
+  this.paidNum = num - freeNum;
 }
 
 /**
@@ -114,6 +114,39 @@ function isPromotionItem(barcode){
 }
 
 /**
+*function getTitle():返回账单title条目
+*/
+function getTitle(){
+    return ("***<没钱赚商店>购物清单***\n");
+}
+
+/**
+*function getSplitLine():返回账单分割线
+*/
+function getSplitLine(){
+    return ("----------------------\n");
+}
+
+/**
+*function getStarsLine():返回账单结束starsline
+*/
+function getStarsLine(){
+    return ("**********************");
+}
+
+/**
+*function shoppintList(inputs):打印购物账单
+*@param:inputs 输入的购物单
+*@return:shoppingItemInfo 输出购物详单
+*/
+function shoppingItem(detailList){
+    var shoppingItemInfo ="名称："+detailList.name+"，数量："+detailList.num+
+                  detailList.unit+"，单价："+detailList.price.toFixed(2)+"(元)，小计："+
+                  (detailList.price*detailList.paidNum).toFixed(2)+"(元)\n";
+    return shoppingItemInfo;
+}
+
+/**
 *function printInventory(inputs):打印账单
 *@param:inputs 输入的购物单
 */
@@ -122,24 +155,23 @@ function printInventory(inputs){
     var detailList = getDetailList(realInputs);
     var sumPrice = 0;
     var savePrice = 0;
-    var printInfo = "***<没钱赚商店>购物清单***\n";
+
+    var printInfo = getTitle();
 
     for(var i in detailList ){
-	     printInfo += "名称："+detailList[i].name+"，数量："+detailList[i].num+
-                     detailList[i].unit+"，单价："+detailList[i].price.toFixed(2)+"(元)，小计："+
-		                 (detailList[i].price*detailList[i].paidNum).toFixed(2)+"(元)\n";
+	     printInfo += shoppingItem(detailList[i]);
 	     sumPrice += detailList[i].price*detailList[i].paidNum;
     }
 
-    printInfo += "----------------------\n挥泪赠送商品：\n";
+    printInfo += getSplitLine()+"挥泪赠送商品：\n";
     for( i in detailList ){
 	     if(detailList[i].freeNum>0){
 	     printInfo +="名称："+detailList[i].name+"，数量："+detailList[i].freeNum+detailList[i].unit+"\n";
 	     savePrice += detailList[i].price*detailList[i].freeNum;
-	    }
+	}
     }
-    printInfo +="----------------------\n";
-    printInfo +="总计："+sumPrice.toFixed(2)+"(元)\n"+"节省：" +(savePrice).toFixed(2)+"(元)\n";
-    printInfo +="**********************";
+    printInfo += getSplitLine();
+    printInfo += "总计："+sumPrice.toFixed(2)+"(元)\n"+"节省：" +(savePrice).toFixed(2)+"(元)\n";
+    printInfo += getStarsLine();
     console.log(printInfo);
 }
