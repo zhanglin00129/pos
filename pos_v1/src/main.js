@@ -52,23 +52,28 @@ function getDetailList(realInputs){
 
     for(var item in realInputs){
 	     var currentInfo = getInfoFromAllItem(item);
-	     var tempFreeNum = 0;
-	     if(isPromotionItem(item)==1){
-	         tempFreeNum = getFreeNum(realInputs[item]);
-       }
-	     var tempPaidNum = realInputs[item]-tempFreeNum;
-	     detailList[j]={
-	        barcode : currentInfo.barcode,
-	        name : currentInfo.name,
-	        unit : currentInfo.unit,
-	        price : currentInfo.price,
-	        num : realInputs[item],
-	        freeNum : tempFreeNum,
-	        paidNum : tempPaidNum
-	      } ;
+	     var tempFreeNum = (isPromotionItem(item)==1) ? realInputs[item]:0;
+
+       detailList[j] = new DetailListItem(currentInfo.barcode,currentInfo.name,currentInfo.unit,
+                                          currentInfo.price,realInputs[item],tempFreeNum);
 	     j++;
     }
     return detailList;
+}
+
+/**
+*function DetailListItem(barcode,name,unit,price,num,freeNum)
+*@param:
+*@return:
+*/
+function DetailListItem(barcode,name,unit,price,num,freeNum){
+  this.barcode = barcode;
+  this.name = name;
+  this.unit = unit;
+  this.price = price;
+  this.num = num;
+  this.freeNum = freeNum;
+  this.paidNum = num - freenum;
 }
 
 /**
@@ -120,22 +125,21 @@ function printInventory(inputs){
     var printInfo = "***<没钱赚商店>购物清单***\n";
 
     for(var i in detailList ){
-	printInfo += "名称："+detailList[i].name+"，数量："+detailList[i].num+
+	     printInfo += "名称："+detailList[i].name+"，数量："+detailList[i].num+
                      detailList[i].unit+"，单价："+detailList[i].price.toFixed(2)+"(元)，小计："+
-		     (detailList[i].price*detailList[i].paidNum).toFixed(2)+"(元)\n";
-	sumPrice += detailList[i].price*detailList[i].paidNum;
+		                 (detailList[i].price*detailList[i].paidNum).toFixed(2)+"(元)\n";
+	     sumPrice += detailList[i].price*detailList[i].paidNum;
     }
 
     printInfo += "----------------------\n挥泪赠送商品：\n";
     for( i in detailList ){
-	if(detailList[i].freeNum>0){
-	    printInfo +="名称："+detailList[i].name+"，数量："+detailList[i].freeNum+detailList[i].unit+"\n";
-	    savePrice += detailList[i].price*detailList[i].freeNum;
-	}
+	     if(detailList[i].freeNum>0){
+	     printInfo +="名称："+detailList[i].name+"，数量："+detailList[i].freeNum+detailList[i].unit+"\n";
+	     savePrice += detailList[i].price*detailList[i].freeNum;
+	    }
     }
     printInfo +="----------------------\n";
     printInfo +="总计："+sumPrice.toFixed(2)+"(元)\n"+"节省：" +(savePrice).toFixed(2)+"(元)\n";
     printInfo +="**********************";
     console.log(printInfo);
-
 }
