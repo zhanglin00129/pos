@@ -1,14 +1,9 @@
 var Util = Util || {};
 
 Util.splitByDelimiter = function(input,delimiter){
-    var result = {};
-    result[0] = input.split(delimiter)[0];
-    if(input.indexOf(delimiter)>0){
-      result[1] = (parseInt)(input.split(delimiter)[1]);
-    }else{
-      result[1] = null;
-    }
-    return result;
+  var result = input.split(delimiter);
+  result[1] = (!result[1])?1:(parseInt)(input.split(delimiter)[1]);
+  return result;
 };
 
 Util.titleLine = function(){
@@ -36,5 +31,5 @@ Util.splitLine = function() {
 };
 
 Util.endLine  = function() {
-  return "**********************\n";
+  return "**********************";
 };
